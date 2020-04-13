@@ -13,11 +13,13 @@ jobs:
     - name: import certs
       run: |
         openssl aes-256-cbc -k  "${{ secrets.ENCRYPTION_SECRET }}" -in ".github/certs/cert.p12.enc" -d -out ".github/certs/cert.p12"
+        openssl aes-256-cbc -k  "${{ secrets.ENCRYPTION_SECRET }}" -in ".github/certs/codesign.p12.enc" -d -out ".github/certs/codesign.p12"
         security create-keychain -p mysecretpassword build.keychain
         security default-keychain -s build.keychain
         security unlock-keychain -p mysecretpassword build.keychain
         security set-keychain-settings -t 3600 -u build.keychain
         security import "./.github/certs/cert.p12" -k build.keychain -T /usr/bin/codesign -P ""
+        security import "./.github/certs/codesign.p12" -k build.keychain -T /usr/bin/codesign -P ""
         bash .github/enableKeyChain.sh
         gem install bundler:1.16.2
         bundle install
