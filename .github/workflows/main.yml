@@ -6,18 +6,18 @@ jobs:
   build:
     runs-on: macOS-latest
     env:
-      CODE_SIGN_IDENTITY: "Developer ID Application: Fuzhou West2Online Internet Inc. (MEWHFZ92DY)"
+      CODE_SIGN_IDENTITY: "Apple Development: shaoreceive@outlook.com (6VT57CBDXM)"
   
     steps:
     - uses: actions/checkout@v1
     - name: import certs
       run: |
-        openssl aes-256-cbc -k  "${{ secrets.ENCRYPTION_SECRET }}" -in ".github/certs/dist.p12.enc" -d -a -out ".github/certs/dist.p12"
+        openssl aes-256-cbc -k  "${{ secrets.ENCRYPTION_SECRET }}" -in ".github/certs/cert.p12.enc" -d -a -out ".github/certs/cert.p12"
         security create-keychain -p mysecretpassword build.keychain
         security default-keychain -s build.keychain
         security unlock-keychain -p mysecretpassword build.keychain
         security set-keychain-settings -t 3600 -u build.keychain
-        security import "./.github/certs/dist.p12" -k build.keychain -T /usr/bin/codesign -P ""
+        security import "./.github/certs/cert.p12" -k build.keychain -T /usr/bin/codesign -P ""
         bash .github/enableKeyChain.sh
         gem install bundler:1.16.2
         bundle install
@@ -25,7 +25,7 @@ jobs:
     - name: setup Go
       uses: actions/setup-go@v1
       with:
-        go-version: 1.13.x
+        go-version: 1.14.1
 
     - name: update beta build version
       if: contains(github.event.head_commit.message, '[beta]') && !startsWith(github.ref, 'refs/tags/')
@@ -95,7 +95,7 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       env:
         GITHUB_TOKEN: ${{ secrets.GITPAGE_TOKEN }}
-      run: 'curl -u yichengchen:$GITHUB_TOKEN -X POST https://api.github.com/repos/yichengchen/clashX/pages/builds -H "Accept: application/vnd.github.mister-fantastic-preview+json"'
+      run: 'curl -u XinSSS:$GITHUB_TOKEN -X POST https://api.github.com/repos/XinSSS/clashX/pages/builds -H "Accept: application/vnd.github.mister-fantastic-preview+json"'
 
     - name: upload crashlytics symbols
       if: startsWith(github.ref, 'refs/tags/')  || contains(github.event.head_commit.message, '[appcenter]')
