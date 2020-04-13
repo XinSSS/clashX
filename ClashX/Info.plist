@@ -11,7 +11,7 @@
 	<key>CFBundleIconFile</key>
 	<string>Icon</string>
 	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<string>com.shaox.ClashX</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -28,7 +28,7 @@
 			<key>CFBundleURLIconFile</key>
 			<string>Icon</string>
 			<key>CFBundleURLName</key>
-			<string>com.west2online.ClashX</string>
+			<string>com.shaox.ClashX</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>clashx</string>
@@ -40,7 +40,7 @@
 			<key>CFBundleURLIconFile</key>
 			<string>Icon</string>
 			<key>CFBundleURLName</key>
-			<string>com.west2online.Clash</string>
+			<string>com.shaox.Clash</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>clash</string>
@@ -75,19 +75,15 @@
 		<true/>
 	</dict>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2018年 yichengchen. All rights reserved.</string>
+	<string>Copyright © 2020年 yichengchen. All rights reserved.</string>
 	<key>NSMainStoryboardFile</key>
 	<string>Main</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>SMAuthorizedClients</key>
-	<array>
-		<string>identifier "com.west2online.ClashX" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: chen yicheng (96U846XGYH)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
-	</array>
 	<key>SMPrivilegedExecutables</key>
 	<dict>
-		<key>com.west2online.ClashX.ProxyConfigHelper</key>
-		<string>anchor apple generic and identifier "com.west2online.ClashX.ProxyConfigHelper" and (certificate leaf[field.1.2.840.113635.100.6.1.9] /* exists */ or certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = MEWHFZ92DY)</string>
+		<key>com.shaox.ClashX.ProxyConfigHelper</key>
+		<string>identifier &quot;com.shaox.ClashX.ProxyConfigHelper&quot; and anchor apple generic and certificate leaf[subject.CN] = &quot;Apple Development: shaoreceive@outlook.com (6VT57CBDXM)&quot; and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 	</dict>
 	<key>SUFeedURL</key>
 	<string>https://yichengchen.github.io/clashX/appcast.xml</string>

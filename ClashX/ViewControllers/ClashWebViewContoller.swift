@@ -122,7 +122,7 @@ class ClashWebViewContoller: NSViewController {
     }
 
     func loadWebRecourses() {
-        // defaults write com.west2online.ClashX webviewUrl "your url"
+        // defaults write com.shaox.ClashX webviewUrl "your url"
         let defaultUrl = "\(ConfigManager.apiUrl)/ui/"
         let url = UserDefaults.standard.string(forKey: "webviewUrl") ?? defaultUrl
         if let url = URL(string: url) {

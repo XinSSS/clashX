@@ -3,10 +3,10 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>com.west2online.ClashX.ProxyConfigHelper</string>
+	<string>com.shaox.ClashX.ProxyConfigHelper</string>
 	<key>MachServices</key>
 	<dict>
-		<key>com.west2online.ClashX.ProxyConfigHelper</key>
+		<key>com.shaox.ClashX.ProxyConfigHelper</key>
 		<true/>
 	</dict>
 </dict>

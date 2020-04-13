@@ -1,6 +1,6 @@
 //
 //  ProxySettingTool.m
-//  com.west2online.ClashX.ProxyConfigHelper
+//  com.shaox.ClashX.ProxyConfigHelper
 //
 //  Created by yichengchen on 2019/8/17.
 //  Copyright © 2019 west2online. All rights reserved.
@@ -101,7 +101,7 @@
 
 
 + (NSString *)getUserHomePath {
-    SCDynamicStoreRef store = SCDynamicStoreCreate(NULL, CFSTR("com.west2online.ClashX.ProxyConfigHelper"), NULL, NULL);
+    SCDynamicStoreRef store = SCDynamicStoreCreate(NULL, CFSTR("com.shaox.ClashX.ProxyConfigHelper"), NULL, NULL);
     CFStringRef CopyCurrentConsoleUsername(SCDynamicStoreRef store);
     CFStringRef result;
     uid_t uid;
@@ -222,7 +222,7 @@
 }
 
 - (void)applySCNetworkSettingWithRef:(void(^)(SCPreferencesRef))callback {
-    SCPreferencesRef ref = SCPreferencesCreateWithAuthorization(nil, CFSTR("com.west2online.ClashX.ProxyConfigHelper.config"), nil, self.authRef);
+    SCPreferencesRef ref = SCPreferencesCreateWithAuthorization(nil, CFSTR("com.shaox.ClashX.ProxyConfigHelper.config"), nil, self.authRef);
     if (!ref) {
         return;
     }
@@ -253,7 +253,7 @@
         return @"AuthorizationCreateFromExternalForm fail";
     }
     
-    NSString *authName = @"com.west2online.ClashX.ProxyConfigHelper.config";
+    NSString *authName = @"com.shaox.ClashX.ProxyConfigHelper.config";
     AuthorizationItem authItem = {authName.UTF8String, 0, NULL, 0};
     AuthorizationRights authRight = {1, &authItem};
     

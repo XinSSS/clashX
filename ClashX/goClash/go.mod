@@ -1,9 +1,11 @@
 module github.com/yichengchen/clashX/ClashX
 
 require (
-	github.com/Dreamacro/clash v0.19.1-0.20200408074912-3ccd7def8642
+	github.com/brobird/clash v0.0.0-20200410152301-18ba0c55e5e8
+	github.com/brobird/gossr v0.0.0-20200301124130-51310d37cfeb // indirect
 	github.com/oschwald/geoip2-golang v1.4.0
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
+	gitlab.com/yawning/chacha20.git v0.0.0-20190903091407-6d1cb28dc72c // indirect
 )
 
 go 1.13
