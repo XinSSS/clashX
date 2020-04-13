@@ -12,7 +12,7 @@ jobs:
     - uses: actions/checkout@v1
     - name: import certs
       run: |
-        openssl aes-256-cbc -k  "${{ secrets.ENCRYPTION_SECRET }}" -in ".github/certs/cert.p12.enc" -d -a -out ".github/certs/cert.p12"
+        openssl aes-256-cbc -k  "${{ secrets.ENCRYPTION_SECRET }}" -in ".github/certs/cert.p12.enc" -d -out ".github/certs/cert.p12"
         security create-keychain -p mysecretpassword build.keychain
         security default-keychain -s build.keychain
         security unlock-keychain -p mysecretpassword build.keychain
