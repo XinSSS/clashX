@@ -85,7 +85,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // install proxy helper
         _ = ClashResourceManager.check()
-        SystemProxyManager.shared.checkInstall()
+        PrivilegedHelperManager.shared.checkInstall()
         ConfigFileManager.copySampleConfigIfNeed()
 
         PFMoveToApplicationsFolderIfNecessary()
@@ -94,6 +94,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         removeUnExistProxyGroups()
 
         // start proxy
+        initClashCore()
         setupData()
         updateConfig(showNotification: false)
         updateLoggingLevel()
@@ -252,8 +253,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NotificationCenter
             .default
             .rx
-            .notification(.systemNetworkStatusIPUpdate)
-            .observeOn(MainScheduler.instance).debounce(.seconds(5), scheduler: MainScheduler.instance).bind { [weak self] _ in
+            .notification(.systemNetworkStatusIPUpdate).map({ _ in
+                NetworkChangeNotifier.getPrimaryIPAddress(allowIPV6: false)
+            })
+            .startWith(NetworkChangeNotifier.getPrimaryIPAddress(allowIPV6: false))
+            .distinctUntilChanged()
+            .skip(1)
+            .filter { $0 != nil }
+            .observeOn(MainScheduler.instance)
+            .debounce(.seconds(5), scheduler: MainScheduler.instance).bind { [weak self] _ in
                 self?.healthHeckOnNetworkChange()
             }.disposed(by: disposeBag)
 
@@ -424,7 +432,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func healthHeckOnNetworkChange() {
-        guard NetworkChangeNotifier.getPrimaryIPAddress() != nil else { return }
         ApiRequest.requestProxyGroupList {
             res in
             for group in res.proxyGroups {
