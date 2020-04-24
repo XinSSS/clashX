@@ -9,12 +9,12 @@
 	<key>CFBundleName</key>
 	<string>com.shaox.ClashX.ProxyConfigHelper</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.4</string>
+	<string>1.5</string>
 	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<string>2</string>
 	<key>SMAuthorizedClients</key>
 	<array>
-		<string>identifier &quot;com.shaox.ClashX&quot; and anchor apple generic and certificate leaf[subject.CN] = &quot;Apple Development: shaoreceive@outlook.com (6VT57CBDXM)&quot; and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
+		<string>identifier "com.shaox.ClashX" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: shaoreceive@outlook.com (6VT57CBDXM)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 	</array>
 </dict>
 </plist>
