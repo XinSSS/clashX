@@ -11,7 +11,6 @@ import RxCocoa
 import SwiftyJSON
 
 class MenuItemFactory {
-    private static var cachedProxyMenuItem: [NSMenuItem]?
     private static var cachedProxyData: ClashProxyResp?
 
     private static var showSpeedTestItemAtTop: Bool = UserDefaults.standard.object(forKey: "kShowSpeedTestItemAtTop") as? Bool ?? AppDelegate.isAboveMacOS14 {
@@ -35,43 +34,43 @@ class MenuItemFactory {
             if info?.proxiesMap.keys != previousInfo?.proxiesMap.keys {
                 // force update menu
                 refreshMenuItems(mergedData: info)
-            return
-        }
+                return
+            }
 
             for proxy in info?.proxies ?? [] {
                 NotificationCenter.default.post(name: .proxyUpdate(for: proxy.name), object: proxy, userInfo: nil)
             }
         }
-        }
+    }
 
     static func recreateProxyMenuItems() {
         getMergedProxyData {
             proxyInfo in
             refreshMenuItems(mergedData: proxyInfo)
         }
-            }
+    }
 
     static func refreshMenuItems(mergedData proxyInfo: ClashProxyResp?) {
         guard let proxyInfo = proxyInfo else { return }
-            var menuItems = [NSMenuItem]()
-            for proxy in proxyInfo.proxyGroups {
-                var menu: NSMenuItem?
-                switch proxy.type {
+        var menuItems = [NSMenuItem]()
+        for proxy in proxyInfo.proxyGroups {
+            var menu: NSMenuItem?
+            switch proxy.type {
             case .select: menu = generateSelectorMenuItem(proxyGroup: proxy, proxyInfo: proxyInfo)
-                case .urltest, .fallback: menu = generateUrlTestFallBackMenuItem(proxyGroup: proxy, proxyInfo: proxyInfo)
-                case .loadBalance:
-                    menu = generateLoadBalanceMenuItem(proxyGroup: proxy, proxyInfo: proxyInfo)
-                case .relay:
-                    menu = generateListOnlyMenuItem(proxyGroup: proxy, proxyInfo: proxyInfo)
-                default: continue
-                }
-
-                if let menu = menu {
-                    menuItems.append(menu)
-                    menu.isEnabled = true
-                }
+            case .urltest, .fallback: menu = generateUrlTestFallBackMenuItem(proxyGroup: proxy, proxyInfo: proxyInfo)
+            case .loadBalance:
+                menu = generateLoadBalanceMenuItem(proxyGroup: proxy, proxyInfo: proxyInfo)
+            case .relay:
+                menu = generateListOnlyMenuItem(proxyGroup: proxy, proxyInfo: proxyInfo)
+            default: continue
             }
-            let items = Array(menuItems.reversed())
+
+            if let menu = menu {
+                menuItems.append(menu)
+                menu.isEnabled = true
+            }
+        }
+        let items = Array(menuItems.reversed())
         updateProxyList(withMenus: items)
     }
 
@@ -153,21 +152,17 @@ class MenuItemFactory {
         }
         let submenu = ProxyGroupMenu(title: proxyGroup.name)
 
-        let isSpeedtestAble = proxyGroup.speedtestAble.count > 0
-
         for proxy in proxyGroup.all ?? [] {
             guard let proxyModel = proxyMap[proxy] else { continue }
             let proxyItem = ProxyMenuItem(proxy: proxyModel,
-                                          action: #selector(MenuItemFactory.actionSelectProxy(sender:)),
-                                          selected: proxy == selectedName,
-                                          speedtestAble: isSpeedtestAble,
-                                          maxProxyNameLength: proxyGroup.maxProxyNameLength)
+                                          group: proxyGroup,
+                                          action: #selector(MenuItemFactory.actionSelectProxy(sender:)))
             proxyItem.target = MenuItemFactory.self
             submenu.add(delegate: proxyItem)
             submenu.addItem(proxyItem)
         }
 
-        if isSpeedtestAble && useViewToRenderProxy {
+        if proxyGroup.isSpeedTestable && useViewToRenderProxy {
             submenu.minimumWidth = proxyGroup.maxProxyNameLength + ProxyItemView.fixedPlaceHolderWidth
         }
 
@@ -190,7 +185,7 @@ class MenuItemFactory {
 
         for proxyName in proxyGroup.all ?? [] {
             guard let proxy = proxyMap[proxyName] else { continue }
-            let proxyMenuItem = NSMenuItem(title: proxy.name, action: #selector(empty), keyEquivalent: "")
+            let proxyMenuItem = ProxyMenuItem(proxy: proxy, group: proxyGroup, action: #selector(empty), simpleItem: true)
             proxyMenuItem.target = MenuItemFactory.self
             if proxy.name == selectedName {
                 proxyMenuItem.state = .on
@@ -225,19 +220,16 @@ class MenuItemFactory {
         let menu = NSMenuItem(title: proxyGroup.name, action: nil, keyEquivalent: "")
         let submenu = ProxyGroupMenu(title: proxyGroup.name)
 
-        let isSpeedTestAble = proxyGroup.speedtestAble.count > 0
         for proxy in proxyGroup.all ?? [] {
             guard let proxyModel = proxyMap[proxy] else { continue }
             let proxyItem = ProxyMenuItem(proxy: proxyModel,
-                                          action: #selector(empty),
-                                          selected: false,
-                                          speedtestAble: isSpeedTestAble,
-                                          maxProxyNameLength: proxyGroup.maxProxyNameLength)
+                                          group: proxyGroup,
+                                          action: #selector(empty))
             proxyItem.target = MenuItemFactory.self
             submenu.add(delegate: proxyItem)
             submenu.addItem(proxyItem)
         }
-        if isSpeedTestAble && useViewToRenderProxy {
+        if proxyGroup.isSpeedTestable && useViewToRenderProxy {
             submenu.minimumWidth = proxyGroup.maxProxyNameLength + ProxyItemView.fixedPlaceHolderWidth
         }
         addSpeedTestMenuItem(submenu, proxyGroup: proxyGroup)
@@ -254,10 +246,9 @@ class MenuItemFactory {
         for proxy in proxyGroup.all ?? [] {
             guard let proxyModel = proxyMap[proxy] else { continue }
             let proxyItem = ProxyMenuItem(proxy: proxyModel,
+                                          group: proxyGroup,
                                           action: #selector(empty),
-                                          selected: false,
-                                          speedtestAble: false,
-                                          maxProxyNameLength: proxyGroup.maxProxyNameLength)
+                                          simpleItem: true)
             proxyItem.target = MenuItemFactory.self
             submenu.add(delegate: proxyItem)
             submenu.addItem(proxyItem)
