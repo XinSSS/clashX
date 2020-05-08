@@ -48,7 +48,8 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, '[appcenter]')
       run: |
         npm install --global create-dmg
-        create-dmg ClashX.app
+        cp -R ClashX.app ClashXR.app
+        create-dmg ClashXR.app
         mv ClashX*.dmg ClashX.dmg
 
     - name: upload build to github
