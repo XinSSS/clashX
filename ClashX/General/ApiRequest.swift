@@ -117,12 +117,14 @@ class ApiRequest {
         // NORMAL MODE: Use internal api
         clashRequestQueue.async {
         let res = clashUpdateConfig(filePath.goStringBuffer())?.toString() ?? placeHolderErrorDesp
-        if res == "success" {
-            callback(nil)
-        } else {
-            callback(res)
+         DispatchQueue.main.async {
+                if res == "success" {
+                    callback(nil)
+                } else {
+                    callback(res)
+                }
+            }
         }
-    }
     }
 
     static func updateOutBoundMode(mode: ClashProxyMode, callback: ((Bool) -> Void)? = nil) {
