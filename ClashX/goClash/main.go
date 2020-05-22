@@ -1,7 +1,13 @@
 package main
+
 import (
 	"C"
 	"encoding/json"
+	"net"
+	"path/filepath"
+	"strconv"
+	"strings"
+	
 	"github.com/brobird/clash/config"
 	"github.com/brobird/clash/constant"
 	"github.com/brobird/clash/hub/executor"
@@ -9,10 +15,6 @@ import (
 	"github.com/brobird/clash/log"
 	"github.com/oschwald/geoip2-golang"
 	"github.com/phayes/freeport"
-	"net"
-	"path/filepath"
-	"strconv"
-	"strings"
 )
 
 func isAddrValid(addr string) bool {
@@ -34,7 +36,7 @@ func initClashCore() {
 	constant.SetConfig(configFile)
 }
 
-func parseConfig(checkPort bool) (*config.Config, error) {
+func parseDefaultConfigThenStart(checkPort, allowLan bool) (*config.Config, error) {
 	cfg, err := executor.Parse()
 	if err != nil {
 		return nil, err
@@ -48,8 +50,8 @@ func parseConfig(checkPort bool) (*config.Config, error) {
 			cfg.General.ExternalController = "127.0.0.1:" + strconv.Itoa(port)
 			cfg.General.Secret = ""
 		}
+		cfg.General.AllowLan = allowLan
 	}
-
 	go route.Start(cfg.General.ExternalController, cfg.General.Secret)
 
 	executor.ApplyConfig(cfg, true)
@@ -72,8 +74,8 @@ func verifyClashConfig(content *C.char) *C.char {
 }
 
 //export run
-func run(checkConfig bool) *C.char {
-	cfg, err := parseConfig(checkConfig)
+func run(checkConfig, allowLan bool) *C.char {
+	cfg, err := parseDefaultConfigThenStart(checkConfig,allowLan)
 	if err != nil {
 		return C.CString(err.Error())
 	}
