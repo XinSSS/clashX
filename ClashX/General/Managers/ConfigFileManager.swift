@@ -19,8 +19,7 @@ class ConfigFileManager {
         pause = true
     }
 
-    func watchConfigFile(configName: String) {
-        let path = Paths.configPath(for: configName)
+    func watchFile(path: String) {
         witness = Witness(paths: [path], flags: .FileEvents, latency: 0.3) {
             [weak self] events in
             guard let self = self else { return }
@@ -38,6 +37,11 @@ class ConfigFileManager {
                 }
             }
         }
+    }
+
+    func stopWatchConfigFile() {
+        witness = nil
+        pause = false
     }
 
     @discardableResult

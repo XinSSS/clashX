@@ -172,12 +172,14 @@ class RemoteConfigManager {
             }
             config.isPlaceHolderName = false
 
-            let savePath = Paths.configPath(for: config.name)
-
-            if config.name == ConfigManager.selectConfigName {
+            if iCloudManager.shared.isICloudEnable() {
+                ConfigFileManager.shared.stopWatchConfigFile()
+            } else if config.name == ConfigManager.selectConfigName {
                 ConfigFileManager.shared.pauseForNextChange()
             }
 
+            let saveAction: ((String) -> Void) = {
+                savePath in
             do {
                 if FileManager.default.fileExists(atPath: savePath) {
                     try FileManager.default.removeItem(atPath: savePath)
@@ -186,6 +188,18 @@ class RemoteConfigManager {
                 complete?(nil)
             } catch let err {
                 complete?(err.localizedDescription)
+            }
+        }
+
+            if iCloudManager.shared.isICloudEnable() {
+                iCloudManager.shared.getUrl { url in
+                    guard let url = url else { return }
+                    let saveUrl = url.appendingPathComponent(Paths.configFileName(for: config.name))
+                    saveAction(saveUrl.path)
+                }
+            } else {
+                let savePath = Paths.localConfigPath(for: config.name)
+                saveAction(savePath)
             }
         }
     }
