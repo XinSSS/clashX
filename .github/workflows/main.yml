@@ -19,12 +19,6 @@ jobs:
       with:
         go-version: 1.14.x
 
-    - name: update beta build version
-      if: contains(github.event.head_commit.message, '[beta]') && !startsWith(github.ref, 'refs/tags/')
-      run: |
-        bundle exec fastlane beta
-        bundle exec fastlane run set_info_plist_value path:ClashX/Info.plist key:BETA value:YES
-
     - name: build
       env:
         CODE_SIGN_IDENTITY: "Apple Development: shaoreceive@outlook.com (6VT57CBDXM)"
