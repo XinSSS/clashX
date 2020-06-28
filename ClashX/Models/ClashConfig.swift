@@ -8,9 +8,9 @@
 import Foundation
 
 enum ClashProxyMode: String, Codable {
-    case rule = "Rule"
-    case global = "Global"
-    case direct = "Direct"
+    case rule
+    case global
+    case direct
 }
 
 extension ClashProxyMode {
