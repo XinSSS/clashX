@@ -47,7 +47,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBOutlet var buildApiModeMenuitem: NSMenuItem!
     @IBOutlet var showProxyGroupCurrentMenuItem: NSMenuItem!
     @IBOutlet var copyExportCommandMenuItem: NSMenuItem!
+    @IBOutlet var copyExportCommandExternalMenuItem: NSMenuItem!
     @IBOutlet var experimentalMenu: NSMenu!
+    @IBOutlet var externalControlSeparator: NSMenuItem!
 
     var disposeBag = DisposeBag()
     var statusItemView: StatusItemView!
@@ -73,6 +75,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemView.frame = CGRect(x: 0, y: 0, width: statusItemLengthWithSpeed, height: 22)
         statusMenu.delegate = self
         setupStatusMenuItemData()
+        AppVersionUtil.showUpgradeAlert()
         DispatchQueue.main.async {
             self.postFinishLaunching()
         }
@@ -128,9 +131,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             Logger.log("ClashX quit need clean proxy setting")
             shouldWait = true
             group.enter()
-            let port = ConfigManager.shared.currentConfig?.port ?? 0
-            let socketPort = ConfigManager.shared.currentConfig?.socketPort ?? 0
-            SystemProxyManager.shared.disableProxy(port: port, socksPort: socketPort) {
+            SystemProxyManager.shared.disableProxy {
                 group.leave()
             }
         }
@@ -232,19 +233,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
                 self.proxyModeMenuItem.title = "\(NSLocalizedString("Proxy Mode", comment: "")) (\(config.mode.name))"
 
-                if old?.port != config.port || old?.socketPort != config.socketPort {
-                    Logger.log("port config updated,new: \(config.port),\(config.socketPort)")
+                if old?.usedHttpPort != config.usedHttpPort || old?.usedSocksPort != config.usedSocksPort {
+                    Logger.log("port config updated,new: \(config.usedHttpPort),\(config.usedSocksPort)")
                     if ConfigManager.shared.proxyPortAutoSet {
-                    SystemProxyManager.shared.enableProxy(port: config.port, socksPort: config.socketPort)
+                        SystemProxyManager.shared.enableProxy(port: config.usedHttpPort, socksPort: config.usedSocksPort)
                     }
                 }
 
-                self.httpPortMenuItem.title = "Http Port: \(config.port)"
-                self.socksPortMenuItem.title = "Socks Port: \(config.socketPort)"
+                self.httpPortMenuItem.title = "Http Port: \(config.usedHttpPort)"
+                self.socksPortMenuItem.title = "Socks Port: \(config.usedSocksPort)"
                 self.apiPortMenuItem.title = "Api Port: \(ConfigManager.shared.apiPort)"
                 self.ipMenuItem.title = "IP: \(NetworkChangeNotifier.getPrimaryIPAddress() ?? "")"
 
+                if RemoteControlManager.selectConfig == nil {
                 ClashStatusTool.checkPortConfig(cfg: config)
+                }
 
             }.disposed(by: disposeBag)
     }
@@ -306,6 +309,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 let rawProxy = NetworkChangeNotifier.getRawProxySetting()
                 Logger.log("proxy changed to no clashX setting: \(rawProxy)", level: .warning)
                 NSUserNotificationCenter.default.postProxyChangeByOtherAppNotice()
+            }.disposed(by: disposeBag)
+
+        NotificationCenter
+            .default
+            .rx
+            .notification(.systemNetworkStatusIPUpdate).map({ _ in
+                NetworkChangeNotifier.getPrimaryIPAddress(allowIPV6: false)
+            }).bind { [weak self] _ in
+                if RemoteControlManager.selectConfig != nil {
+                    self?.resetStreamApi()
+                }
             }.disposed(by: disposeBag)
     }
 
@@ -439,6 +453,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         AutoUpgardeManager.shared.setup()
         AutoUpgardeManager.shared.addChanelMenuItem(&experimentalMenu)
         updateExperimentalFeatureStatus()
+        RemoteControlManager.setupMenuItem(separator: externalControlSeparator)
     }
 
     func updateExperimentalFeatureStatus() {
@@ -455,6 +470,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             Logger.log("Resting proxy setting, current:\(rawProxy)", level: .warning)
             SystemProxyManager.shared.disableProxy()
             SystemProxyManager.shared.enableProxy()
+        }
+
+        if RemoteControlManager.selectConfig != nil {
+            resetStreamApi()
         }
     }
 
@@ -535,24 +554,22 @@ extension AppDelegate {
         } else {
             ConfigManager.shared.proxyPortAutoSet = !ConfigManager.shared.proxyPortAutoSet
         }
-        let port = ConfigManager.shared.currentConfig?.port ?? 0
-        let socketPort = ConfigManager.shared.currentConfig?.socketPort ?? 0
 
         if ConfigManager.shared.proxyPortAutoSet {
             if canSaveProxy {
                 SystemProxyManager.shared.saveProxy()
             }
-            SystemProxyManager.shared.enableProxy(port: port, socksPort: socketPort)
+            SystemProxyManager.shared.enableProxy()
         } else {
-            SystemProxyManager.shared.disableProxy(port: port, socksPort: socketPort)
+            SystemProxyManager.shared.disableProxy()
         }
     }
 
     @IBAction func actionCopyExportCommand(_ sender: NSMenuItem) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        let port = ConfigManager.shared.currentConfig?.port ?? 0
-        let socksport = ConfigManager.shared.currentConfig?.socketPort ?? 0
+        let port = ConfigManager.shared.currentConfig?.usedHttpPort ?? 0
+        let socksport = ConfigManager.shared.currentConfig?.usedSocksPort ?? 0
         let localhost = "127.0.0.1"
         let isLocalhostCopy = sender == copyExportCommandMenuItem
         let ip = isLocalhostCopy ? localhost :

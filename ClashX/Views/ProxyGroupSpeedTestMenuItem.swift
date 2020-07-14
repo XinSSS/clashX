@@ -111,22 +111,26 @@ fileprivate class ProxyGroupSpeedTestMenuItemView: MenuItemBaseView {
             }
         }
 
-        if providers.count > 0 {
-            for provider in providers {
-                ApiRequest.healthCheck(proxy: provider)
-            }
-            enclosingMenuItem?.menu?.cancelTracking()
+        label.stringValue = NSLocalizedString("Testing", comment: "")
+        enclosingMenuItem?.isEnabled = false
+        setNeedsDisplay()
 
-        } else {
-            label.stringValue = NSLocalizedString("Testing", comment: "")
-            enclosingMenuItem?.isEnabled = false
-            setNeedsDisplay()
+            for provider in providers {
+            testGroup.enter()
+
+            ApiRequest.healthCheck(proxy: provider) {
+                testGroup.leave()
+            }
+            }
+
             testGroup.notify(queue: .main) {
                 [weak self] in
                 guard let self = self, let menu = self.enclosingMenuItem else { return }
                 self.label.stringValue = menu.title
                 menu.isEnabled = true
                 self.setNeedsDisplay()
+            if providers.count > 0 {
+                MenuItemFactory.refreshExistingMenuItems()
             }
         }
     }

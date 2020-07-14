@@ -119,6 +119,12 @@ class ClashWebViewContoller: NSViewController {
         view.window?.styleMask.insert(.closable)
         view.window?.styleMask.insert(.resizable)
         view.window?.styleMask.insert(.miniaturizable)
+        if #available(OSX 10.13, *) {
+            view.window?.toolbar = NSToolbar()
+            view.window?.toolbar?.showsBaselineSeparator = false
+            view.wantsLayer = true
+            view.layer?.cornerRadius = 10
+        }
 
         view.window?.minSize = minSize
         if let lastSize = lastSize, lastSize != .zero {
@@ -143,7 +149,7 @@ class ClashWebViewContoller: NSViewController {
 
     func loadWebRecourses() {
         // defaults write com.shaox.ClashX webviewUrl "your url"
-        let defaultUrl = "\(ConfigManager.apiUrl)/ui/"
+        let defaultUrl = "http://127.0.0.1:\(ConfigManager.shared.apiPort)/ui/"
         let url = UserDefaults.standard.string(forKey: "webviewUrl") ?? defaultUrl
         if let url = URL(string: url) {
             webview.load(URLRequest(url: url, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: 0))
